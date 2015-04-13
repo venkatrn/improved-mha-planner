@@ -61,6 +61,7 @@ class EnvironmentMHA : public DiscreteSpaceInformation
      * \brief GetSuccs methods that inform the environment which queue the states are being expanded from
      */
     using DiscreteSpaceInformation::GetSuccs;
+    using DiscreteSpaceInformation::GetPreds;
     using DiscreteSpaceInformation::GetLazySuccs;
     using DiscreteSpaceInformation::GetLazyPreds;
     using DiscreteSpaceInformation::GetTrueCost;
@@ -71,12 +72,18 @@ class EnvironmentMHA : public DiscreteSpaceInformation
       throw new SBPL_Exception();
     }
 
+    virtual void GetPreds(int q_id, int SourceStateID, std::vector<int>* PredIDV, std::vector<int>* CostV) 
+    {
+      SBPL_ERROR("ERROR: GetPreds with q_id is not implemented for this environment!\n");
+      throw new SBPL_Exception();
+    }
+
     virtual void GetLazySuccs(int q_id, int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
       SBPL_ERROR("ERROR: GetLazySuccs with q_id is not implemented for this environment!\n");
       throw new SBPL_Exception();
     };
 
-    virtual void GetLazyPreds(int q_id, int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
+    virtual void GetLazyPreds(int q_id, int SourceStateID, std::vector<int>* PredIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
       SBPL_ERROR("ERROR: GetLazyPreds with q_id is not implemented for this environment!\n");
       throw new SBPL_Exception();
     };
