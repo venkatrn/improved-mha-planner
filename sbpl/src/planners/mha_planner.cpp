@@ -533,6 +533,7 @@ void MHAPlanner::putStateInHeap(int q_id, MHAState *state) {
         key.key[0] = long(state->g + int(inflation_eps * state->h));
       } else {
         key.key[0] = long(state->h);
+        key.key[1] = long(state->g + int(inflation_eps * state->h));
       }
 
       break;
@@ -543,6 +544,7 @@ void MHAPlanner::putStateInHeap(int q_id, MHAState *state) {
         key.key[0] = long(state->g + state->h);
       } else {
         key.key[0] = long(state->h);
+        key.key[1] = long(state->g);
       }
 
       break;
@@ -550,6 +552,7 @@ void MHAPlanner::putStateInHeap(int q_id, MHAState *state) {
 
     case mha_planner::MHAType::GBFS: {
       key.key[0] = long(state->h);
+      key.key[1] = long(state->g);
       break;
     }
     }
@@ -953,7 +956,13 @@ int MHAPlanner::ImprovePath() {
   }
 
   if (!heaps[0].emptyheap() && goal_state->g > min_key.key[0]) {
-    return 2;  //search exited because it ran out of time
+    if (mha_type != mha_planner::MHAType::FOCAL) {
+        return 2;  //search exited because it ran out of time
+    }
+    // If using FOCAL MHA*, then we need to check g(goal) < w*min_key.
+    if (goal_state->g > inflation_eps * min_key.key[0]) {
+      return 2;
+    }
   }
 
   printf("search exited with a solution for eps=%.3f\n", inflation_eps);

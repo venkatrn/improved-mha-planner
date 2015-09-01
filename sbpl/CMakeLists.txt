@@ -12,7 +12,7 @@ add_definitions(-DROS)
 find_package( PkgConfig REQUIRED)
 pkg_check_modules( gsl REQUIRED gsl )
 
-rosbuild_add_library(sbpl
+rosbuild_add_library(sbpl_ros
   src/discrete_space_information/environment_nav2D.cpp
   src/discrete_space_information/environment_navxythetalat.cpp
   src/discrete_space_information/environment_navxythetamlevlat.cpp
@@ -33,7 +33,7 @@ rosbuild_add_library(sbpl
   src/utils/2Dgridsearch.cpp
   src/utils/config.cpp	
   )
-target_link_libraries(sbpl ${gsl_LIBRARIES})
+target_link_libraries(sbpl_ros ${gsl_LIBRARIES})
 
 #set(SBPL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
 #set(SBPL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib")
@@ -42,10 +42,10 @@ target_link_libraries(sbpl ${gsl_LIBRARIES})
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 rosbuild_add_executable(test_sbpl src/test/main.cpp)
-target_link_libraries(test_sbpl sbpl)
+target_link_libraries(test_sbpl sbpl_ros)
 
 rosbuild_add_executable(test_adjacency_list src/test/test_adjacency_list.cpp)
-target_link_libraries(test_adjacency_list sbpl)
+target_link_libraries(test_adjacency_list sbpl_ros)
 
 # Download needed data file
 rosbuild_download_test_data(http://pr.willowgarage.com/data/sbpl/env_examples/nav2d/willow-25mm-inflated-env.cfg env_examples/nav2d/willow-25mm-inflated-env.cfg 1b4551eeba6df03b6e597e598bbaa4f3)

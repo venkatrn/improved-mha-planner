@@ -10,7 +10,7 @@
   <depend package="roscpp"/>
 
   <export>
-    <cpp cflags="-I${prefix}/include -O3 -DROS" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lsbpl"/>
+    <cpp cflags="-I${prefix}/include -O3 -DROS" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lsbpl_ros"/>
   </export>
   
   <platform os="ubuntu" version="9.04"/>
