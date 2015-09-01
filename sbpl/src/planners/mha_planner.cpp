@@ -533,7 +533,7 @@ void MHAPlanner::putStateInHeap(int q_id, MHAState *state) {
         key.key[0] = long(state->g + int(inflation_eps * state->h));
       } else {
         key.key[0] = long(state->h);
-        key.key[1] = long(state->g + int(inflation_eps * state->h));
+        key.key[1] = long(state->g);
       }
 
       break;
