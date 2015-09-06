@@ -741,7 +741,8 @@ int MHAPlanner::ImprovePath() {
 
         // Get best state from eps-focal list. There will be atleast one state because FOCAL is a subset of
         // EPS-FOCAL and it contains the anchor state for sure.
-        int best_heur = INFINITECOST;
+        CKey best_key;
+        best_key.SetKeytoInfinity();
 
         for (int kk = 1; kk <= heaps[0].currentsize; ++kk) {
           MHAState *sa = (MHAState *)heaps[0].heap[kk].heapstate;
@@ -759,11 +760,11 @@ int MHAPlanner::ImprovePath() {
             continue;
           }
 
-          int heur = uhs_state->h;
+          CKey key = heaps[q_id].getkeyheap(uhs_state);
 
-          if (heur < best_heur) {
+          if (key < best_key) {
             state = uhs_state;
-            best_heur = heur;
+            best_key = key;
           }
         }
       }
@@ -790,7 +791,8 @@ int MHAPlanner::ImprovePath() {
 
         // Get best state from eps-focal list. There will be atleast one state because FOCAL is a subset of
         // EPS-FOCAL and it contains the anchor state for sure.
-        int best_heur = INFINITECOST;
+        CKey best_key;
+        best_key.SetKeytoInfinity();
 
         for (int kk = 1; kk <= heaps[0].currentsize; ++kk) {
           MHAState *sa = (MHAState *)heaps[0].heap[kk].heapstate;
@@ -808,11 +810,11 @@ int MHAPlanner::ImprovePath() {
             continue;
           }
 
-          int heur = uhs_state->h;
+          CKey key = heaps[q_id].getkeyheap(uhs_state);
 
-          if (heur < best_heur) {
+          if (key < best_key) {
             state = uhs_state;
-            best_heur = heur;
+            best_key = key;
           }
         }
       }
