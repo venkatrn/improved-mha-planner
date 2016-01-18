@@ -70,12 +70,14 @@ class MHAReplanParams: public ReplanParams
     inflation_eps = 1.0;
     anchor_eps = 1.0;
     use_anchor = true;
+    use_lazy = false;
     meta_search_type = mha_planner::MetaSearchType::ROUND_ROBIN;
     planner_type = mha_planner::PlannerType::SMHA;
     mha_type = mha_planner::MHAType::PLUS;
   };
     double inflation_eps, anchor_eps;
     bool use_anchor;
+    bool use_lazy;
     mha_planner::MetaSearchType meta_search_type;
     mha_planner::PlannerType planner_type;
     mha_planner::MHAType mha_type;

@@ -43,33 +43,12 @@ MHAPlanner::MHAPlanner(EnvironmentMHA *environment, int num_heurs,
   incons.resize(num_heuristics);
   states.resize(num_heuristics);
 
-  use_lazy_ = false;
-
   // Meta A*
-  //max_edge_cost = 60; //TODO: This must be obtained from the environment
   queue_best_h_meta_heaps.resize(num_heuristics);
   best_h_states.resize(num_heuristics);
-  max_heur_dec.resize(num_heuristics, 0);
 
-  if (num_heuristics == 4) {
-    max_heur_dec[0] = 320;
-    max_heur_dec[1] = 320;
-    max_heur_dec[2] = 2100;
-    max_heur_dec[3] = 2100;
-  } else {
-    max_heur_dec.clear();
-    /*
-       const int dec_val = 250;
-       max_heur_dec.resize(num_heuristics, dec_val);
-       max_heur_dec[0] = 320;
-       max_heur_dec[1] = 2100;
-       max_heur_dec[2] = 44;
-       */
-    const int max_edge_cost = 60;
-    max_heur_dec.resize(num_heuristics, max_edge_cost);
-  }
-
-
+  const int max_edge_cost = 60;  // TODO: Get from environment.
+  max_heur_dec.resize(num_heuristics, max_edge_cost);
 
   // DTS
   alpha.resize(num_heuristics, 1.0);
@@ -168,7 +147,7 @@ void MHAPlanner::ExpandState(int q_id, MHAState *parent) {
   vector<bool> isTrueCost;
 
 
-  if (use_lazy_) {
+  if (params.use_lazy) {
     if (bforwardsearch) {
       env_->GetLazySuccs(q_id, parent->id, &children, &costs, &isTrueCost);
     } else {
@@ -209,7 +188,7 @@ void MHAPlanner::ExpandState(int q_id, MHAState *parent) {
       assert(child->h >= 0);
 
       //DTS
-      if (!use_lazy_ && child->h < queue_best_h_dts[q_id]) {
+      if (!params.use_lazy && child->h < queue_best_h_dts[q_id]) {
         queue_best_h_dts[q_id] = child->h;
         assert(queue_best_h_dts[q_id] >= 0);
       }
@@ -241,7 +220,7 @@ void MHAPlanner::ExpandState(int q_id, MHAState *parent) {
         //if (best_h == 0)
         //ROS_ERROR("meta queue %d is done",j);
         //DTS
-        if (!use_lazy_ && child->h < queue_best_h_dts[j]) {
+        if (!params.use_lazy && child->h < queue_best_h_dts[j]) {
           queue_best_h_dts[j] = child->h;
 
           if (queue_best_h_dts[j] == 0) {
@@ -265,21 +244,23 @@ void MHAPlanner::ExpandState(int q_id, MHAState *parent) {
   //std::cin.get();
 
   // Meta-A*
-  //queue_expands[q_id]++;
-  BestHState *best_h_state = GetBestHState(q_id, parent->id);
-  queue_best_h_meta_heaps[q_id].deleteheap(best_h_state);
+  queue_expands[q_id]++;
+  if (!params.use_lazy) {
+    BestHState *best_h_state = GetBestHState(q_id, parent->id);
+    queue_best_h_meta_heaps[q_id].deleteheap(best_h_state);
 
-  // delete from the other queues as well if SMHA.
-  if (planner_type == mha_planner::PlannerType::SMHA) {
-    for (int j = 0; j < num_heuristics; ++j) {
-      if (j != q_id) {
-        BestHState *best_h_state_to_del = GetBestHState(j, parent->id);
-        queue_best_h_meta_heaps[j].deleteheap(best_h_state_to_del);
+    // delete from the other queues as well if SMHA.
+    if (planner_type == mha_planner::PlannerType::SMHA) {
+      for (int j = 0; j < num_heuristics; ++j) {
+        if (j != q_id) {
+          BestHState *best_h_state_to_del = GetBestHState(j, parent->id);
+          queue_best_h_meta_heaps[j].deleteheap(best_h_state_to_del);
+        }
       }
     }
   }
 
-  if (!use_lazy_) {
+  if (!params.use_lazy) {
     // DTS
     double reward = 0;
 
@@ -320,7 +301,7 @@ void MHAPlanner::ExpandState(int q_id, MHAState *parent) {
 //it's minimum f-value is an underestimate (the edge cost from the parent is a guess and needs to be evaluated properly)
 //it hasn't been expanded yet this iteration
 void MHAPlanner::EvaluateState(int q_id, MHAState *state) {
-  if (!use_lazy_) {
+  if (!params.use_lazy) {
     ROS_ERROR("planner is set to not use lazy, but we got successors without a true cost!");
     exit(1);
   }
@@ -692,7 +673,7 @@ int MHAPlanner::ImprovePath() {
 
     if (!spin_again || meta_search_type != mha_planner::MetaSearchType::DTS) {
       q_id = GetBestHeuristicID();
-      queue_expands[q_id]++;
+      // queue_expands[q_id]++;
       //printf("chose queue %d\n",q_id);
     } else {
       //printf("spin again %d\n",q_id);
@@ -928,7 +909,7 @@ int MHAPlanner::ImprovePath() {
       expands++;
       ExpandState(q_id, state);
 
-      if (use_lazy_) {
+      if (params.use_lazy) {
         spin_again = true;
       }
 
@@ -942,6 +923,7 @@ int MHAPlanner::ImprovePath() {
 
     //get the min key for the next iteration
     min_key = heaps[0].getminkeyheap();
+    anchor_val = max(anchor_val, int(min_key.key[0]));
     //printf("min_key =%d\n",min_key.key[0]);
   }
 
@@ -957,14 +939,8 @@ int MHAPlanner::ImprovePath() {
     return 0;  //solution does not exists
   }
 
-  if (!heaps[0].emptyheap() && goal_state->g > min_key.key[0]) {
-    if (mha_type != mha_planner::MHAType::FOCAL) {
+  if (!heaps[0].emptyheap() && goal_state->g > inflation_eps * anchor_val) {
         return 2;  //search exited because it ran out of time
-    }
-    // If using FOCAL MHA*, then we need to check g(goal) < w*min_key.
-    if (goal_state->g > inflation_eps * min_key.key[0]) {
-      return 2;
-    }
   }
 
   printf("search exited with a solution for eps=%.3f\n", inflation_eps);
@@ -1075,7 +1051,7 @@ vector<int> MHAPlanner::GetSearchPath(int &solcost) {
       break;
     }
 
-    if (use_lazy_) {
+    if (params.use_lazy) {
       if (bforwardsearch) {
         env_->GetLazySuccs(state->expanded_best_parent->id, &SuccIDV, &CostV,
                            &isTrueCost);
