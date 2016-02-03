@@ -1,0 +1,28 @@
+<package>
+  <name>sbpl</name>
+  <version>1.0.0</version>
+  <description>A library of search-based planning algorithms</description>
+  <maintainer email="maximl@seas.upenn.edu">Maxim Likhachev</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://ros.org/wiki/sbpl</url>
+  <!-- <url type="bugtracker"></url> -->
+
+  <!-- Dependencies which this package needs to build itself. -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Dependencies needed to compile this package. -->
+  <build_depend>roscpp</build_depend>
+
+  <!-- Dependencies needed after this package is compiled. -->
+  <run_depend>roscpp</run_depend>
+
+  <!-- Dependencies needed only for running tests. -->
+  <!-- <test_depend>roscpp</test_depend> -->
+
+<export>
+    <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lsbpl_ros" cflags="-I${prefix}/include -O3 -DROS"/>
+</export>
+
+</package>
