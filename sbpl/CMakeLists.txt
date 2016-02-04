@@ -44,7 +44,7 @@ add_library(sbpl_ros
 target_link_libraries(sbpl_ros ${gsl_LIBRARIES} ${catkin_LIBRARIES})
 
 # Download needed data file
-catkin_download_test_data(http://pr.willowgarage.com/data/sbpl/env_examples/nav2d/willow-25mm-inflated-env.cfg 
+download_test_data(http://pr.willowgarage.com/data/sbpl/env_examples/nav2d/willow-25mm-inflated-env.cfg 
   env_examples/nav2d/willow-25mm-inflated-env.cfg 1b4551eeba6df03b6e597e598bbaa4f3)
 
 #set(SBPL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
