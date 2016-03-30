@@ -599,7 +599,7 @@ int MHAPlanner::ImprovePath() {
   CKey min_key = heaps[0].getminkeyheap();
 
 
-  static int anchor_val = 0;
+  int anchor_val = min_key.key[0];
 
   // MHA*++ and Unconstrained-MHA*
   // while (!heaps[0].emptyheap() &&
@@ -924,7 +924,8 @@ int MHAPlanner::ImprovePath() {
     //get the min key for the next iteration
     min_key = heaps[0].getminkeyheap();
     anchor_val = max(anchor_val, int(min_key.key[0]));
-    //printf("min_key =%d\n",min_key.key[0]);
+    // printf("min_key =%d\n",min_key.key[0]);
+    // printf("anchor_val =%d\n",anchor_val);
   }
 
   search_expands += expands;
