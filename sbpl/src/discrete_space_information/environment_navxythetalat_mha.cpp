@@ -659,14 +659,14 @@ bool EnvironmentNAVXYTHETALATTICE::ReadIslands(FILE* fIslands)
     }
     islands_.reserve(numIslands);
     //read in the islands
-    int x = 0;
-    int y = 0;
+    double x = 0;
+    double y = 0;
     for (int ii = 0; ii < numIslands; ++ii) {
-      if (fscanf(fIslands, "%d", &x) != 1) {
+      if (fscanf(fIslands, "%lf", &x) != 1) {
           SBPL_ERROR("ERROR: incorrect format for islands file\n");
           return false;
       }
-      if (fscanf(fIslands, "%d", &y) != 1) {
+      if (fscanf(fIslands, "%lf", &y) != 1) {
           SBPL_ERROR("ERROR: incorrect format for islands file\n");
           return false;
       }
@@ -676,7 +676,7 @@ bool EnvironmentNAVXYTHETALATTICE::ReadIslands(FILE* fIslands)
     SBPL_PRINTF("done");
     SBPL_PRINTF("Islands:");
     for (int ii = 0; ii < numIslands; ++ii) {
-      SBPL_PRINTF("%d,  %d", islands_[ii].first, islands_[ii].second);
+      SBPL_PRINTF("%f,  %f", islands_[ii].first, islands_[ii].second);
     }
     return true;
 }
@@ -2723,15 +2723,15 @@ int EnvironmentNAVXYTHETALAT::GetGoalHeuristic(int q_id, int stateID)
       return 0;
     }
     EnvNAVXYTHETALATHashEntry_t* HashEntry = StateID2CoordTable[stateID];
-    int island_x_disc = islands_[q_id - 1].first;
-    int island_y_disc = islands_[q_id - 1].second;
+    int island_x_disc = CONTXY2DISC(islands_[q_id - 1].first, EnvNAVXYTHETALATCfg.cellsize_m);
+    int island_y_disc = CONTXY2DISC(islands_[q_id - 1].second, EnvNAVXYTHETALATCfg.cellsize_m);
     int hEuclid = (int)(NAVXYTHETALAT_COSTMULT_MTOMM * EuclideanDistance_m(HashEntry->X, HashEntry->Y,
                                                                            island_x_disc,
                                                                            island_y_disc));
 
-    int hEuclidGoal = (int)(NAVXYTHETALAT_COSTMULT_MTOMM * EuclideanDistance_m(island_x_disc, island_y_disc,
-                                                                           EnvNAVXYTHETALATCfg.EndX_c,
-                                                                           EnvNAVXYTHETALATCfg.EndY_c));
+    // int hEuclidGoal = (int)(NAVXYTHETALAT_COSTMULT_MTOMM * EuclideanDistance_m(island_x_disc, island_y_disc,
+    //                                                                        EnvNAVXYTHETALATCfg.EndX_c,
+    //                                                                        EnvNAVXYTHETALATCfg.EndY_c));
     // hEuclid += hEuclidGoal;
     return static_cast<int>(static_cast<double>(hEuclid) / EnvNAVXYTHETALATCfg.nominalvel_mpersecs);
 }

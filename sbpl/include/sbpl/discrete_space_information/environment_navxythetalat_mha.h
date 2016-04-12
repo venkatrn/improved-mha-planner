@@ -413,9 +413,8 @@ public:
     virtual void PrintVars() { }
 
 protected:
-    // (x,y) pairs in DISCRETE coordinates. 
-    // TODO: make continuous instead?
-    std::vector<std::pair<int,int>> islands_;
+    // (x,y) pairs in continuous coordinates. 
+    std::vector<std::pair<double,double>> islands_;
 
     virtual int GetActionCost(int SourceX, int SourceY, int SourceTheta, EnvNAVXYTHETALATAction_t* action);
 
