@@ -30,6 +30,7 @@
 #include <boost/math/distributions.hpp>
 using namespace boost::math;
 using namespace std;
+using namespace mha_planner;
 
 MHAPlanner::MHAPlanner(EnvironmentMHA *environment, int num_heurs,
                        bool bSearchForward) :
@@ -43,8 +44,6 @@ MHAPlanner::MHAPlanner(EnvironmentMHA *environment, int num_heurs,
   incons.resize(num_heuristics);
   states.resize(num_heuristics);
 
-  // Meta A*
-  queue_best_h_meta_heaps.resize(num_heuristics);
   best_h_states.resize(num_heuristics);
 
   const int max_edge_cost = 60;  // TODO: Get from environment.
@@ -176,13 +175,15 @@ void MHAPlanner::ExpandState(int q_id, MHAState *parent) {
       insertLazyList(q_id, child, parent, costs[i], isTrueCost[i]);
 
       //Meta-A*
-      BestHState *best_h_state = GetBestHState(q_id, child->id);
-      CKey key;
-      key.key[0] = child->h;
+      if (meta_search_type == MetaSearchType::META_A_STAR) {
+        BestHState *best_h_state = GetBestHState(q_id, child->id);
+        CKey key;
+        key.key[0] = child->h;
 
-      // Assuming never need to update h-values once computed
-      if (best_h_state->heapindex == 0) {
-        queue_best_h_meta_heaps[q_id].insertheap(best_h_state, key);
+        // Assuming never need to update h-values once computed
+        if (best_h_state->heapindex == 0) {
+          queue_best_h_meta_heaps[q_id].insertheap(best_h_state, key);
+        }
       }
 
       assert(child->h >= 0);
@@ -202,20 +203,22 @@ void MHAPlanner::ExpandState(int q_id, MHAState *parent) {
         insertLazyList(j, child, parent, costs[i], isTrueCost[i]);
 
         //Meta-A*
-        BestHState *best_h_state = GetBestHState(j, child->id);
-        CKey key;
-        key.key[0] = child->h;
+        if (meta_search_type == MetaSearchType::META_A_STAR) {
+          BestHState *best_h_state = GetBestHState(j, child->id);
+          CKey key;
+          key.key[0] = child->h;
 
-        // Assuming never need to update h-values once computed
-        if (best_h_state->heapindex == 0) {
-          //printf("Inserting in %d with %d\n", j, key.key[0]);
-          queue_best_h_meta_heaps[j].insertheap(best_h_state, key);
+          // Assuming never need to update h-values once computed
+          if (best_h_state->heapindex == 0) {
+            //printf("Inserting in %d with %d\n", j, key.key[0]);
+            queue_best_h_meta_heaps[j].insertheap(best_h_state, key);
+          }
+
+          // TODO: Remove this after verifying it works
+          key = queue_best_h_meta_heaps[j].getminkeyheap();
+          int best_h = key.key[0];
+          assert(best_h >= 0);
         }
-
-        // TODO: Remove this after verifying it works
-        key = queue_best_h_meta_heaps[j].getminkeyheap();
-        int best_h = key.key[0];
-        assert(best_h >= 0);
 
         //if (best_h == 0)
         //SBPL_ERROR("meta queue %d is done",j);
@@ -245,7 +248,7 @@ void MHAPlanner::ExpandState(int q_id, MHAState *parent) {
 
   // Meta-A*
   queue_expands[q_id]++;
-  if (!params.use_lazy) {
+  if (!params.use_lazy && meta_search_type == MetaSearchType::META_A_STAR) {
     BestHState *best_h_state = GetBestHState(q_id, parent->id);
     queue_best_h_meta_heaps[q_id].deleteheap(best_h_state);
 
@@ -1168,11 +1171,16 @@ void MHAPlanner::initializeSearch() {
   // Reset the Meta-A* state variables
   queue_expands.clear();
   queue_best_h_dts.clear();
+
   queue_expands.resize(num_heuristics, 0);
   queue_best_h_dts.resize(num_heuristics, INFINITECOST);
 
-  for (int ii = 0; ii < num_heuristics; ++ii) {
-    queue_best_h_meta_heaps[ii].makeemptyheap();
+  queue_best_h_meta_heaps.clear();
+  if (meta_search_type == MetaSearchType::META_A_STAR) {
+    queue_best_h_meta_heaps.resize(num_heuristics);
+    for (int ii = 0; ii < num_heuristics; ++ii) {
+      queue_best_h_meta_heaps[ii].makeemptyheap();
+    }
   }
 
   // Reset the DTS state variables
@@ -1219,10 +1227,13 @@ void MHAPlanner::initializeSearch() {
     heaps[ii].insertheap(start_state, key);
 
     queue_best_h_dts[ii] = start_state->h;
-    BestHState *best_h_state = GetBestHState(ii, start_state->id);
-    CKey h_key;
-    h_key.key[0] = start_state->h;
-    queue_best_h_meta_heaps[ii].insertheap(best_h_state, h_key);
+
+    if (meta_search_type == MetaSearchType::META_A_STAR) {
+      BestHState *best_h_state = GetBestHState(ii, start_state->id);
+      CKey h_key;
+      h_key.key[0] = start_state->h;
+      queue_best_h_meta_heaps[ii].insertheap(best_h_state, h_key);
+    }
   }
 
   start_state = GetState(0, start_state_id);
@@ -1369,10 +1380,8 @@ int MHAPlanner::GetBestHeuristicID() {
       }
 
       if (print) {
-        CKey key = queue_best_h_meta_heaps[ii].getminkeyheap();
-        int best_h = key.key[0];
-        printf("                      qid=%d g=%d h=%d (queue best h=%d)\n", ii,
-               queue_expands[ii], best_h / max_heur_dec[ii], best_h);
+        printf("                      qid=%d g=%d\n", ii,
+               queue_expands[ii]);
       }
     }
 
