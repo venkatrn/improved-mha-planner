@@ -46,8 +46,8 @@
 #include <sbpl/discrete_space_information/environment.h>
 #include <sbpl/discrete_space_information/environment_nav2D.h>
 #include <sbpl/discrete_space_information/environment_nav2Duu.h>
-#include <sbpl/discrete_space_information/environment_navxythetalat.h>
-#include <sbpl/discrete_space_information/environment_navxythetamlevlat.h>
+#include <sbpl/discrete_space_information/environment_navxythetalat_mha.h>
+// #include <sbpl/discrete_space_information/environment_navxythetamlevlat.h>
 #include <sbpl/discrete_space_information/environment_robarm.h>
 #include <sbpl/discrete_space_information/environment_XXX.h>
 #include <sbpl/discrete_space_information/environment_mha.h>

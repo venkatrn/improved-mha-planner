@@ -6,7 +6,7 @@ set(ROS_BUILD_TYPE Release)
 
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_FLAGS "-std=c++0x")
-add_definitions(-DROS)
+# add_definitions(-DROS)
 
 find_package( PkgConfig REQUIRED)
 pkg_check_modules( gsl REQUIRED gsl )
@@ -22,8 +22,8 @@ catkin_package(
 
 add_library(sbpl_ros
   src/discrete_space_information/environment_nav2D.cpp
-  src/discrete_space_information/environment_navxythetalat.cpp
-  src/discrete_space_information/environment_navxythetamlevlat.cpp
+  src/discrete_space_information/environment_navxythetalat_mha.cpp
+  # src/discrete_space_information/environment_navxythetamlevlat.cpp
   src/discrete_space_information/environment_nav2Duu.cpp
   src/discrete_space_information/environment_XXX.cpp
   src/discrete_space_information/environment_robarm.cpp
@@ -50,8 +50,11 @@ download_test_data(http://pr.willowgarage.com/data/sbpl/env_examples/nav2d/willo
 #set(SBPL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
 #set(SBPL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 
-add_executable(test_sbpl src/test/main.cpp)
-target_link_libraries(test_sbpl sbpl_ros)
+# add_executable(test_sbpl src/test/main.cpp)
+# target_link_libraries(test_sbpl sbpl_ros)
+
+add_executable(test_pa_islands src/test/main_pa_islands.cpp)
+target_link_libraries(test_pa_islands sbpl_ros)
 
 add_executable(test_adjacency_list src/test/test_adjacency_list.cpp)
 target_link_libraries(test_adjacency_list sbpl_ros)

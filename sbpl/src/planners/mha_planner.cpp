@@ -218,13 +218,13 @@ void MHAPlanner::ExpandState(int q_id, MHAState *parent) {
         assert(best_h >= 0);
 
         //if (best_h == 0)
-        //ROS_ERROR("meta queue %d is done",j);
+        //SBPL_ERROR("meta queue %d is done",j);
         //DTS
         if (!params.use_lazy && child->h < queue_best_h_dts[j]) {
           queue_best_h_dts[j] = child->h;
 
           if (queue_best_h_dts[j] == 0) {
-            ROS_ERROR("dts queue %d is done", j);
+            SBPL_PRINTF("dts queue %d is done", j);
             //std::cin.get();
           }
 
@@ -267,7 +267,7 @@ void MHAPlanner::ExpandState(int q_id, MHAState *parent) {
     if (queue_best_h_dts[q_id] < prev_best_h) {
       reward = 1;
     } else {
-      //ROS_ERROR("queue %d got no reward!",q_id);
+      //SBPL_ERROR("queue %d got no reward!",q_id);
       //std::cin.get();
     }
 
@@ -302,7 +302,7 @@ void MHAPlanner::ExpandState(int q_id, MHAState *parent) {
 //it hasn't been expanded yet this iteration
 void MHAPlanner::EvaluateState(int q_id, MHAState *state) {
   if (!params.use_lazy) {
-    ROS_ERROR("planner is set to not use lazy, but we got successors without a true cost!");
+    SBPL_ERROR("planner is set to not use lazy, but we got successors without a true cost!");
     exit(1);
   }
 
@@ -369,7 +369,7 @@ void MHAPlanner::EvaluateState(int q_id, MHAState *state) {
           queue_best_h_dts[j] = tmp_state->h;
 
           if (queue_best_h_dts[j] == 0) {
-            ROS_ERROR("queue %d is done", j);
+            SBPL_ERROR("queue %d is done", j);
             //std::cin.get();
           }
 
@@ -385,7 +385,7 @@ void MHAPlanner::EvaluateState(int q_id, MHAState *state) {
   if (queue_best_h_dts[q_id] < prev_best_h) {
     reward = 1;
   } else {
-    //ROS_ERROR("queue %d got no reward!",q_id);
+    //SBPL_ERROR("queue %d got no reward!",q_id);
     //std::cin.get();
   }
 
@@ -692,7 +692,7 @@ int MHAPlanner::ImprovePath() {
 
       // Note: The alternative would be to find a q_id whose min_key is within the suboptimality bound.
       if (best_q_min_key.key[0] > anchor_eps * anchor_val) {
-        ROS_WARN("Anchors aweigh! chosen queue (%d) has min key %ld and anchor has min key %d",
+        SBPL_WARN("Anchors aweigh! chosen queue (%d) has min key %ld and anchor has min key %d",
                  q_id, best_q_min_key.key[0], anchor_val);
         //std::cin.get();
         q_id = 0;
@@ -712,12 +712,12 @@ int MHAPlanner::ImprovePath() {
       bool mha_lite_anchor = uhs_val > anchor_val;
 
       if (mha_lite_anchor) {
-        ROS_WARN("Anchor state ID:%d   G:%d    H:%d\n", anchor_state->id,
-                 anchor_state->g, anchor_state->h);
-        ROS_WARN("Anchors aweigh! chosen queue (%d) has f-val %d, anchor-h %d, minkey %ld, and anchor has min key %d",
-                 q_id, anchor_state->g + anchor_state->h,
-                 int(inflation_eps * anchor_state->h), best_q_min_key.key[0],
-                 anchor_val);
+        // SBPL_WARN("Anchor state ID:%d   G:%d    H:%d\n", anchor_state->id,
+        //          anchor_state->g, anchor_state->h);
+        // SBPL_WARN("Anchors aweigh! chosen queue (%d) has f-val %d, anchor-h %d, minkey %ld, and anchor has min key %d",
+        //          q_id, anchor_state->g + anchor_state->h,
+        //          int(inflation_eps * anchor_state->h), best_q_min_key.key[0],
+        //          anchor_val);
         //std::cin.get();
 
         // Get best state from eps-focal list. There will be atleast one state because FOCAL is a subset of
@@ -762,12 +762,12 @@ int MHAPlanner::ImprovePath() {
       bool mha_lite_anchor = uhs_val > inflation_eps * anchor_val;
 
       if (mha_lite_anchor) {
-        ROS_WARN("Anchor state ID:%d   G:%d    H:%d\n", anchor_state->id,
-                 anchor_state->g, anchor_state->h);
-        ROS_WARN("Anchors aweigh! chosen queue (%d) has f-val %d, anchor-h %d, minkey %ld, and anchor has min key %d",
-                 q_id, anchor_state->g + anchor_state->h,
-                 int(inflation_eps * anchor_state->h), best_q_min_key.key[0],
-                 anchor_val);
+        // SBPL_WARN("Anchor state ID:%d   G:%d    H:%d\n", anchor_state->id,
+        //          anchor_state->g, anchor_state->h);
+        // SBPL_WARN("Anchors aweigh! chosen queue (%d) has f-val %d, anchor-h %d, minkey %ld, and anchor has min key %d",
+        //          q_id, anchor_state->g + anchor_state->h,
+        //          int(inflation_eps * anchor_state->h), best_q_min_key.key[0],
+        //          anchor_val);
         //std::cin.get();
 
         // Get best state from eps-focal list. There will be atleast one state because FOCAL is a subset of
@@ -964,8 +964,8 @@ void MHAPlanner::checkHeaps(string msg) {
   for (int i = 1; i < num_heuristics; i++) {
     if (heaps[0].currentsize != heaps[i].currentsize) {
       sameSizes = false;
-      ROS_ERROR("%s", msg.c_str());
-      ROS_ERROR("heap[0] has size %d and heap[%d] has size %d", heaps[0].currentsize,
+      SBPL_ERROR("%s", msg.c_str());
+      SBPL_ERROR("heap[0] has size %d and heap[%d] has size %d", heaps[0].currentsize,
                 i, heaps[i].currentsize);
       std::cin.get();
     }
@@ -992,13 +992,13 @@ void MHAPlanner::checkHeaps(string msg) {
               state->best_parent != state2->best_parent ||
               state->expanded_best_parent != state2->expanded_best_parent ||
               state->isTrueCost != state2->isTrueCost) {
-            ROS_ERROR("%s", msg.c_str());
-            ROS_ERROR("state %d found in queues 0 and %d but state internals didn't match",
+            SBPL_ERROR("%s", msg.c_str());
+            SBPL_ERROR("state %d found in queues 0 and %d but state internals didn't match",
                       state->id, j);
-            ROS_ERROR("heap 0: g=%d v=%d parent=%p expanded_parent=%p trueCost=%d",
+            SBPL_ERROR("heap 0: g=%d v=%d parent=%p expanded_parent=%p trueCost=%d",
                       state->g, state->v, state->best_parent, state->expanded_best_parent,
                       state->isTrueCost);
-            ROS_ERROR("heap %d: g=%d v=%d parent=%p expanded_parent=%p trueCost=%d", j,
+            SBPL_ERROR("heap %d: g=%d v=%d parent=%p expanded_parent=%p trueCost=%d", j,
                       state2->g, state2->v, state2->best_parent, state2->expanded_best_parent,
                       state2->isTrueCost);
             std::cin.get();
@@ -1009,8 +1009,8 @@ void MHAPlanner::checkHeaps(string msg) {
       }
 
       if (!found) {
-        ROS_ERROR("%s", msg.c_str());
-        ROS_ERROR("heap[0] has state %d and heap[%d] doesn't", state->id, j);
+        SBPL_ERROR("%s", msg.c_str());
+        SBPL_ERROR("heap[0] has state %d and heap[%d] doesn't", state->id, j);
         std::cin.get();
       }
     }
@@ -1189,7 +1189,7 @@ void MHAPlanner::initializeSearch() {
   } else if (meta_search_type == mha_planner::MetaSearchType::DTS) {
     printf("DTS ");
   } else {
-    ROS_ERROR("Meta Search approach is unknown!");
+    SBPL_ERROR("Meta Search approach is unknown!");
   }
 
   if (planner_type == mha_planner::PlannerType::IMHA) {
@@ -1197,7 +1197,7 @@ void MHAPlanner::initializeSearch() {
   } else if (planner_type == mha_planner::PlannerType::SMHA) {
     printf("SMHA ");
   } else {
-    ROS_ERROR("Planner type is unknown!");
+    SBPL_ERROR("Planner type is unknown!");
   }
 
   printf("with inflation eps=%f and anchor eps=%f\n", inflation_eps, anchor_eps);
@@ -1496,7 +1496,7 @@ int MHAPlanner::GetBestHeuristicID() {
     assert(best_id != -1);
     return best_id;
   } else {
-    ROS_ERROR("Unsupported meta search method!");
+    SBPL_ERROR("Unsupported meta search method!");
     assert(false);
     return -1;
   }

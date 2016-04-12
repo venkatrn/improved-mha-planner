@@ -35,7 +35,7 @@ using namespace std;
 void heaperror(const char* ErrorString)
 {
     //need to send a message from here somehow
-    ROS_ERROR("%s\n", ErrorString);
+    SBPL_ERROR("%s\n", ErrorString);
     throw new SBPL_Exception();
 }
 
