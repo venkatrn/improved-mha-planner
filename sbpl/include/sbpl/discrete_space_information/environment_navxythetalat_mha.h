@@ -34,6 +34,7 @@
 #include <vector>
 #include <utility>
 #include <sbpl/discrete_space_information/environment_mha.h>
+#include <sbpl_utils/visualization/grid_visualizer.h>
 #include <sbpl/utils/utils.h>
 
 //eight-connected grid
@@ -483,6 +484,8 @@ protected:
     virtual bool ReadIslands(FILE* fMotPrims);
 
     virtual void PrintHeuristicValues();
+
+    GridVisualizer grid_visualizer_;
 };
 
 class EnvironmentNAVXYTHETALAT : public EnvironmentNAVXYTHETALATTICE

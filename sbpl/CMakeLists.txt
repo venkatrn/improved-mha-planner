@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(sbpl)
-find_package(catkin REQUIRED COMPONENTS roscpp)
+find_package(catkin REQUIRED COMPONENTS roscpp sbpl_utils)
 
 set(ROS_BUILD_TYPE Release)
 
@@ -11,10 +11,10 @@ set(CMAKE_CXX_FLAGS "-std=c++0x")
 find_package( PkgConfig REQUIRED)
 pkg_check_modules( gsl REQUIRED gsl )
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/include ${catkin_INCLUDE_DIRS})
 
 catkin_package(
-  CATKIN_DEPENDS roscpp
+  CATKIN_DEPENDS roscpp sbpl_utils
   DEPENDS gsl
   INCLUDE_DIRS include
   LIBRARIES sbpl_ros

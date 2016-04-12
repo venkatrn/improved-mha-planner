@@ -31,6 +31,7 @@
 
 #include "../../sbpl/headers.h"
 #include <sbpl/discrete_space_information/environment_mha.h>
+#include <sbpl_utils/visualization/grid_visualizer.h>
 #include <queue>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>

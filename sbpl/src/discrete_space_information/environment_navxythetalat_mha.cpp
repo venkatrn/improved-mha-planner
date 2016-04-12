@@ -676,6 +676,9 @@ bool EnvironmentNAVXYTHETALATTICE::ReadIslands(FILE* fIslands)
     SBPL_PRINTF("done");
     SBPL_PRINTF("Islands:");
     for (int ii = 0; ii < numIslands; ++ii) {
+      const int island_x_disc = CONTXY2DISC(islands_[ii].first, EnvNAVXYTHETALATCfg.cellsize_m);
+      const int island_y_disc = CONTXY2DISC(islands_[ii].second, EnvNAVXYTHETALATCfg.cellsize_m);
+		  grid_visualizer_.AddSpecialState(island_x_disc, island_y_disc, 0, 0, 255);
       SBPL_PRINTF("%f,  %f", islands_[ii].first, islands_[ii].second);
     }
     return true;
@@ -1609,6 +1612,10 @@ bool EnvironmentNAVXYTHETALATTICE::InitializeEnv(const char* sEnvFile, const vec
     fclose(fIslands);
 
     SBPL_PRINTF("size of env: %d by %d. num islands: %d\n", EnvNAVXYTHETALATCfg.EnvWidth_c, EnvNAVXYTHETALATCfg.EnvHeight_c, static_cast<int>(islands_.size()));
+    
+    grid_visualizer_.SetGrid(EnvNAVXYTHETALATCfg.Grid2D, EnvNAVXYTHETALATCfg.EnvHeight_c, EnvNAVXYTHETALATCfg.EnvWidth_c);
+		grid_visualizer_.AddSpecialState(EnvNAVXYTHETALATCfg.StartX_c, EnvNAVXYTHETALATCfg.StartY_c, 255, 0, 0);
+		grid_visualizer_.AddSpecialState(EnvNAVXYTHETALATCfg.EndX_c, EnvNAVXYTHETALATCfg.EndY_c, 0, 255, 0);
 
     return true;
 }
@@ -2383,6 +2390,8 @@ void EnvironmentNAVXYTHETALAT::GetSuccs(int SourceStateID, vector<int>* SuccIDV,
         CostV->push_back(cost);
         if (actionV != NULL) actionV->push_back(nav3daction);
     }
+
+    grid_visualizer_.VisualizeState(HashEntry->X, HashEntry->Y);
 
 #if TIME_DEBUG
     time_getsuccs += clock()-currenttime;
