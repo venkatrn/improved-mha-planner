@@ -40,6 +40,7 @@
 #include <gflags/gflags.h>
 
 DEFINE_bool(visualization, true, "Visualize states expanded during search (slows down the search)");
+DEFINE_string(stats_file, "", "File to dump stats in");
 
 using namespace std;
 
@@ -169,6 +170,23 @@ int planxythetalat(char* envCfgFilename, char* motPrimFilename, char* islandsFil
     }
     else {
         printf("Solution does not exist\n");
+    }
+
+    // Write stats to file
+    if (!FLAGS_stats_file.empty()) {
+      FILE* fStats = fopen(FLAGS_stats_file.c_str(), "w");
+      if (fStats == NULL) {
+          printf("ERROR: could not open stats file\n");
+          throw new SBPL_Exception();
+      }
+      if (b_ret) {
+      vector<PlannerStats> planner_stats;
+      planner->get_search_stats(&planner_stats);
+        fprintf(fStats, "%f %d %d\n", planner_stats[0].time, planner_stats[0].expands, planner_stats[0].cost);
+      } else {
+        fprintf(fStats, "-1 -1 -1\n");
+      }
+      fclose(fStats);
     }
 
     fflush(NULL);
