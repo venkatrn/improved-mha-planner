@@ -33,7 +33,7 @@
 #include <sbpl/discrete_space_information/environment.h>
 #include <sbpl/utils/utils.h>
 
-class EnvironmentMHA : public DiscreteSpaceInformation
+class EnvironmentMHA : public virtual DiscreteSpaceInformation
 {
   public:
     /**

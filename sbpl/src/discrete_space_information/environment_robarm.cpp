@@ -1170,7 +1170,7 @@ void EnvironmentROBARM::PrintState(int stateID, bool bVerbose, FILE* fOut /*=NUL
     if (stateID == EnvROBARM.goalHashEntry->stateID) bGoal = true;
 
     if (stateID == EnvROBARM.goalHashEntry->stateID && bVerbose) {
-        SBPL_FPRINTF(fOut, "the state is a goal state\n");
+        // SBPL_FPRINTF(fOut, "the state is a goal state\n");
         bGoal = true;
     }
     

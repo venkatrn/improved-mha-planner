@@ -111,7 +111,7 @@ typedef struct
 /**
  * \brief planar kinematic robot arm of variable number of degrees of freedom
  */
-class EnvironmentROBARM : public DiscreteSpaceInformation
+class EnvironmentROBARM : public virtual DiscreteSpaceInformation
 {
 public:
     /**

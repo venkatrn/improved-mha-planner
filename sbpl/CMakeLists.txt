@@ -30,6 +30,7 @@ add_library(sbpl_ros
   src/discrete_space_information/environment_nav2Duu.cpp
   src/discrete_space_information/environment_XXX.cpp
   src/discrete_space_information/environment_robarm.cpp
+  src/discrete_space_information/environment_robarm_mha.cpp
   src/planners/araplanner.cpp
   src/planners/adplanner.cpp
   src/planners/viplanner.cpp
@@ -59,6 +60,9 @@ download_test_data(http://pr.willowgarage.com/data/sbpl/env_examples/nav2d/willo
 
 add_executable(test_pa_islands src/test/main_pa_islands.cpp)
 target_link_libraries(test_pa_islands sbpl_ros)
+
+add_executable(test_roboarm src/test/roboarm_pa_islands.cpp)
+target_link_libraries(test_roboarm sbpl_ros)
 
 add_executable(test_adjacency_list src/test/test_adjacency_list.cpp)
 target_link_libraries(test_adjacency_list sbpl_ros)
