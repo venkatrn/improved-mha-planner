@@ -413,6 +413,10 @@ public:
      */
     virtual void PrintVars() { }
 
+    void SetVisualization(bool visualize) {
+      visualization_ = visualize;
+    }
+
 protected:
     // (x,y) pairs in continuous coordinates. 
     std::vector<std::pair<double,double>> islands_;
@@ -485,6 +489,7 @@ protected:
 
     virtual void PrintHeuristicValues();
 
+    bool visualization_;
     GridVisualizer grid_visualizer_;
 };
 

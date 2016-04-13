@@ -52,7 +52,7 @@ static long int checks = 0;
 
 //-----------------constructors/destructors-------------------------------
 
-EnvironmentNAVXYTHETALATTICE::EnvironmentNAVXYTHETALATTICE()
+EnvironmentNAVXYTHETALATTICE::EnvironmentNAVXYTHETALATTICE() : visualization_(false)
 {
     EnvNAVXYTHETALATCfg.obsthresh = ENVNAVXYTHETALAT_DEFAULTOBSTHRESH;
     //the value that pretty much makes it disabled
@@ -2391,7 +2391,9 @@ void EnvironmentNAVXYTHETALAT::GetSuccs(int SourceStateID, vector<int>* SuccIDV,
         if (actionV != NULL) actionV->push_back(nav3daction);
     }
 
-    grid_visualizer_.VisualizeState(HashEntry->X, HashEntry->Y);
+    if (visualization_) {
+      grid_visualizer_.VisualizeState(HashEntry->X, HashEntry->Y);
+    }
 
 #if TIME_DEBUG
     time_getsuccs += clock()-currenttime;

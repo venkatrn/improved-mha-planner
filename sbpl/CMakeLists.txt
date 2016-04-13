@@ -11,6 +11,9 @@ set(CMAKE_CXX_FLAGS "-std=c++0x")
 find_package( PkgConfig REQUIRED)
 pkg_check_modules( gsl REQUIRED gsl )
 
+find_package(gflags REQUIRED)
+find_package(Threads)
+
 include_directories(${PROJECT_SOURCE_DIR}/include ${catkin_INCLUDE_DIRS})
 
 catkin_package(
@@ -41,7 +44,8 @@ add_library(sbpl_ros
   src/utils/2Dgridsearch.cpp
   src/utils/config.cpp	
   )
-target_link_libraries(sbpl_ros ${gsl_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(sbpl_ros ${gsl_LIBRARIES} ${catkin_LIBRARIES} gflags
+  pthread)
 
 # Download needed data file
 download_test_data(http://pr.willowgarage.com/data/sbpl/env_examples/nav2d/willow-25mm-inflated-env.cfg 

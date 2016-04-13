@@ -37,6 +37,10 @@
 #include <sbpl/planners/mha_planner.h>
 #include <sbpl/discrete_space_information/environment_navxythetalat_mha.h>
 
+#include <gflags/gflags.h>
+
+DEFINE_bool(visualization, true, "Visualize states expanded during search (slows down the search)");
+
 using namespace std;
 
 /*******************************************************************************
@@ -61,7 +65,7 @@ int planxythetalat(char* envCfgFilename, char* motPrimFilename, char* islandsFil
     planner_params.planner_type = mha_planner::PlannerType::SMHA;
     planner_params.mha_type = mha_planner::MHAType::PLUS;
     planner_params.final_eps = planner_params.inflation_eps;
-    planner_params.inflation_eps = 10.0;
+    planner_params.inflation_eps = 500.0;
     planner_params.max_time = 10.0;
     planner_params.return_first_solution = true;
     planner_params.repair_time = -1;
@@ -89,6 +93,7 @@ int planxythetalat(char* envCfgFilename, char* motPrimFilename, char* islandsFil
 
     // Initialize Environment (should be called before initializing anything else)
     EnvironmentNAVXYTHETALAT environment_navxythetalat;
+		environment_navxythetalat.SetVisualization(FLAGS_visualization);
 
     if (!environment_navxythetalat.InitializeEnv(envCfgFilename, perimeterptsV, motPrimFilename, islandsFilename)) {
         printf("ERROR: InitializeEnv failed\n");
@@ -172,10 +177,11 @@ int planxythetalat(char* envCfgFilename, char* motPrimFilename, char* islandsFil
 
 int main(int argc, char *argv[])
 {
-    if (argc != 5) {
+    if (argc < 5) {
       printf("Usage: ./main_pa_islands <env_file> <mprim_file> <islands_file> <solution_file>\n");
       exit(1);
     }
+		google::ParseCommandLineFlags(&argc, &argv, true);
     char *env_file = argv[1];
     char *mprim_file = argv[2];
     char *islands_file = argv[3];

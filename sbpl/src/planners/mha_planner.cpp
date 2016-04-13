@@ -1446,7 +1446,8 @@ int MHAPlanner::GetBestHeuristicID() {
     vector<double> rand_vals(num_heuristics, 0);
 
     for (int i = starting_ind; i < num_heuristics; i++) {
-      if (queue_best_h_dts[i] == 0 ||
+      // The admissible queue will never retire.
+      if ((queue_best_h_dts[i] == 0 && i != 0) ||
           heaps[i].getminkeyheap().key[0] >= INFINITECOST) {
         if (print) {
           printf("%d: done\n", i);
