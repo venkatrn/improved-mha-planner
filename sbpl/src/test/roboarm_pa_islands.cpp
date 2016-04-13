@@ -39,6 +39,8 @@
 
 #include <gflags/gflags.h>
 
+DEFINE_bool(visualization, true,
+            "Visualize states expanded during search (slows down the search)");
 DEFINE_string(stats_file, "", "File to dump stats in");
 
 using namespace std;
@@ -60,6 +62,7 @@ int planrobarm(char *envCfgFilename, char *islandsFilename,
 
   //Initialize Environment (should be called before initializing anything else)
   EnvironmentROBARMMHA environment_robarm;
+  environment_robarm.SetVisualization(FLAGS_visualization);
 
   if (!environment_robarm.InitializeEnv(envCfgFilename, islandsFilename)) {
     printf("ERROR: InitializeEnv failed\n");

@@ -2393,6 +2393,7 @@ void EnvironmentNAVXYTHETALAT::GetSuccs(int SourceStateID, vector<int>* SuccIDV,
 
     if (visualization_) {
       grid_visualizer_.VisualizeState(HashEntry->X, HashEntry->Y);
+      grid_visualizer_.Display(1);
     }
 
 #if TIME_DEBUG

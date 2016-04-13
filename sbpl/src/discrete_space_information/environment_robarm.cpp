@@ -67,6 +67,10 @@ static unsigned int inthash(unsigned int key)
     return key;
 }
 
+EnvironmentROBARM::EnvironmentROBARM() : visualization_(false) {
+
+}
+
 //examples of hash functions: map state coordinates onto a hash value
 //#define GETHASHBIN(X, Y) (Y*WIDTH_Y+X) 
 //here we have state coord: <X1, X2, X3, X4>
@@ -948,6 +952,47 @@ int EnvironmentROBARM::IsValidCoord(short unsigned int coord[NUMOFLINKS], char**
     return retvalue;
 }
 
+vector<pair<int,int>> EnvironmentROBARM::GetLinkEndPoints(short unsigned int coord[NUMOFLINKS]) {
+    vector<pair<int, int>> end_points(NUMOFLINKS + 1);
+    double angles[NUMOFLINKS];
+    double x0, y0, x1, y1;
+    int i;
+
+    //full check of all the links
+    ComputeContAngles(coord, angles);
+
+    //iterate through all the links
+    Cell2ContXY(EnvROBARMCfg.BaseX_c, EnvROBARMCfg.EnvHeight_c - 1, &x1, &y1);
+    end_points[0].first = x1;
+    end_points[0].second = y1;
+    for (i = 0; i < NUMOFLINKS; i++) {
+        //compute the corresponding line segment
+        x0 = x1;
+        y0 = y1;
+        x1 = x0 + EnvROBARMCfg.LinkLength_m[i] * cos(angles[i]);
+        y1 = y0 - EnvROBARMCfg.LinkLength_m[i] * sin(angles[i]);
+        end_points[i + 1].first = x1;
+        end_points[i + 1].second = y1;
+    }
+    return end_points;
+}
+
+
+void EnvironmentROBARM::VisualizeState(short unsigned int coord[NUMOFLINKS]) {
+    vector<pair<int, int>> end_points = GetLinkEndPoints(coord);
+    int x1, x2, y1, y2;
+    for (size_t ii = 0; ii < static_cast<int>(end_points.size()) - 1; ++ii) {
+      x1 = end_points[ii].first;
+      y1 = end_points[ii].second;
+      x2 = end_points[ii + 1].first;
+      y2 = end_points[ii + 1].second;
+      grid_visualizer_.VisualizeLine(x1, y1, x2, y2);
+    }
+    // Show the end-effector cell.
+    grid_visualizer_.VisualizeState(x2, y2, 255, 0, 0);
+    grid_visualizer_.Display(100);
+}
+
 int EnvironmentROBARM::cost(short unsigned int state1coord[], short unsigned int state2coord[])
 {
 
@@ -1049,6 +1094,11 @@ bool EnvironmentROBARM::InitializeEnv(const char* sEnvFile)
 
     //pre-compute heuristics
     ComputeHeuristicValues();
+
+    // grid_visualizer_.SetGrid(reinterpret_cast<const unsigned char *const *const>(EnvROBARMCfg.Grid2D), EnvROBARMCfg.EnvHeight_c, EnvROBARMCfg.EnvWidth_c);
+    grid_visualizer_.SetGrid(EnvROBARMCfg.Grid2D, EnvROBARMCfg.EnvHeight_c, EnvROBARMCfg.EnvWidth_c);
+		grid_visualizer_.AddSpecialState(EnvROBARMCfg.BaseX_c, EnvROBARMCfg.EnvHeight_c - 1, 255, 0, 0);
+		grid_visualizer_.AddSpecialState(EnvROBARMCfg.EndEffGoalX_c, EnvROBARMCfg.EndEffGoalY_c, 0, 255, 0);
 
     return true;
 }
@@ -1319,6 +1369,10 @@ void EnvironmentROBARM::GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector
 
         //restore it back
         succcoord[i] = HashEntry->coord[i];
+    }
+
+    if (visualization_) {
+      VisualizeState(HashEntry->coord);
     }
 }
 

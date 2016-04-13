@@ -32,6 +32,9 @@
 
 #include <cstdio>
 #include <sbpl/discrete_space_information/environment.h>
+#include <sbpl_utils/visualization/grid_visualizer.h>
+
+#include <utility>
 
 #define NUMOFLINKS 6
 //for R* max. distance in coord to a sample point. It should be exactly this,
@@ -114,6 +117,7 @@ typedef struct
 class EnvironmentROBARM : public virtual DiscreteSpaceInformation
 {
 public:
+    EnvironmentROBARM();
     /**
      * \brief initialize environment from a file (see .cfg files in robotarm directory for example)
      */
@@ -176,6 +180,11 @@ public:
 
     ~EnvironmentROBARM() { }
 
+    void SetVisualization(bool visualization) {
+      visualization_ = visualization;
+    }
+
+
 protected:
     //member data
     EnvROBARMConfig_t EnvROBARMCfg;
@@ -226,6 +235,12 @@ protected:
 
     virtual void PrintSuccGoal(int SourceStateID, int costtogoal, bool bVerbose, bool bLocal /*=false*/,
                                FILE* fOut /*=NULL*/);
+
+    virtual std::vector<std::pair<int,int>> GetLinkEndPoints(short unsigned int coord[NUMOFLINKS]);
+    void VisualizeState(short unsigned int coord[NUMOFLINKS]);
+
+    bool visualization_;
+    GridVisualizer grid_visualizer_;
 };
 
 #endif
