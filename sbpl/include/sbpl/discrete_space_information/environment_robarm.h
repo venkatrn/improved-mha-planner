@@ -237,7 +237,7 @@ protected:
                                FILE* fOut /*=NULL*/);
 
     virtual std::vector<std::pair<int,int>> GetLinkEndPoints(short unsigned int coord[NUMOFLINKS]);
-    void VisualizeState(short unsigned int coord[NUMOFLINKS]);
+    void VisualizeState(short unsigned int coord[NUMOFLINKS], int red=255, int green=0, int blue=0);
 
     bool visualization_;
     GridVisualizer grid_visualizer_;

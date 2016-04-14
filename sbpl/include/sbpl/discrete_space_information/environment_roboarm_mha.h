@@ -23,5 +23,6 @@ class EnvironmentROBARMMHA: public EnvironmentMHA, public EnvironmentROBARM
   private:
     // Each island is a double vector of length NUMOFLINKS (continuous angles)
     std::vector<std::vector<double>> islands_;
+    std::vector<int> island_state_ids_;
     bool ReadIslands(FILE *fIslands);
 };

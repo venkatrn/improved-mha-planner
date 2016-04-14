@@ -978,7 +978,7 @@ vector<pair<int,int>> EnvironmentROBARM::GetLinkEndPoints(short unsigned int coo
 }
 
 
-void EnvironmentROBARM::VisualizeState(short unsigned int coord[NUMOFLINKS]) {
+void EnvironmentROBARM::VisualizeState(short unsigned int coord[NUMOFLINKS], int red, int green, int blue) {
     vector<pair<int, int>> end_points = GetLinkEndPoints(coord);
     int x1, x2, y1, y2;
     for (size_t ii = 0; ii < static_cast<int>(end_points.size()) - 1; ++ii) {
@@ -986,10 +986,10 @@ void EnvironmentROBARM::VisualizeState(short unsigned int coord[NUMOFLINKS]) {
       y1 = end_points[ii].second;
       x2 = end_points[ii + 1].first;
       y2 = end_points[ii + 1].second;
-      grid_visualizer_.VisualizeLine(x1, y1, x2, y2);
+      grid_visualizer_.VisualizeLine(x1, y1, x2, y2, red, green, blue);
     }
     // Show the end-effector cell.
-    grid_visualizer_.VisualizeState(x2, y2, 255, 0, 0);
+    grid_visualizer_.VisualizeState(x2, y2, 255 - red, 255 - green, 255 - blue);
     grid_visualizer_.Display(100);
 }
 
