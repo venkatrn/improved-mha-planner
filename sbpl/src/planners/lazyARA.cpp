@@ -29,6 +29,8 @@
 #include <sbpl/planners/lazyARA.h>
 using namespace std;
 
+#define TIMECAST std::chrono::duration_cast<std::chrono::duration<double>>
+
 LazyARAPlanner::LazyARAPlanner(DiscreteSpaceInformation* environment, bool bSearchForward) :
   params(0.0) {
   bforwardsearch = bSearchForward;
@@ -335,7 +337,8 @@ bool LazyARAPlanner::outOfTime(){
   //if we are supposed to run until the first solution, then we are never out of time
   if(params.return_first_solution)
     return false;
-  double time_used = double(clock() - TimeStarted)/CLOCKS_PER_SEC;
+  auto delta_time = TIMECAST(high_res_clock::now() - TimeStarted);
+  double time_used = delta_time.count();
   if(time_used >= params.max_time)
     printf("out of max time\n");
   if(use_repair_time && eps_satisfied != INFINITECOST && time_used >= params.repair_time)
@@ -380,7 +383,7 @@ void LazyARAPlanner::initializeSearch(){
 
 bool LazyARAPlanner::Search(vector<int>& pathIds, int& PathCost){
   CKey key;
-  TimeStarted = clock();
+  TimeStarted = high_res_clock::now();
 
   initializeSearch();
 
@@ -388,7 +391,7 @@ bool LazyARAPlanner::Search(vector<int>& pathIds, int& PathCost){
   while(eps_satisfied > params.final_eps && !outOfTime()){
 
     //run weighted A*
-    clock_t before_time = clock();
+    high_res_clock::time_point before_time = high_res_clock::now();
     int before_expands = search_expands;
     //ImprovePath returns:
     //1 if the solution is found
@@ -398,7 +401,8 @@ bool LazyARAPlanner::Search(vector<int>& pathIds, int& PathCost){
     if(ret == 1) //solution found for this iteration
       eps_satisfied = eps;
     int delta_expands = search_expands - before_expands;
-    double delta_time = double(clock()-before_time)/CLOCKS_PER_SEC;
+    auto elapsed_time = TIMECAST(high_res_clock::now() - before_time);
+    double delta_time = elapsed_time.count();
 
     //print the bound, expands, and time for that iteration
     printf("bound=%f expands=%d cost=%d time=%.3f\n", 
@@ -436,9 +440,10 @@ bool LazyARAPlanner::Search(vector<int>& pathIds, int& PathCost){
     printf("WARNING: a solution was found but we don't have quality bound for it!\n");
 
   printf("solution found\n");
-  clock_t before_reconstruct = clock();
+  high_res_clock::time_point before_reconstruct = high_res_clock::now();
   pathIds = GetSearchPath(PathCost);
-  reconstructTime = double(clock()-before_reconstruct)/CLOCKS_PER_SEC;
+  auto elapsed_time = TIMECAST(high_res_clock::now() - before_reconstruct);
+  reconstructTime = elapsed_time.count();
   totalTime = totalPlanTime + reconstructTime;
 
   return true;

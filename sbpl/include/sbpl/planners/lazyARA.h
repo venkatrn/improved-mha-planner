@@ -32,6 +32,10 @@
 #include "../../sbpl/headers.h"
 #include <queue>
 
+#include <chrono>
+
+using high_res_clock = std::chrono::high_resolution_clock;
+
 class LazyListElement;
 
 class LazyARAState: public AbstractSearchState{
@@ -124,7 +128,7 @@ protected:
 	double eps;
   double eps_satisfied;
   int search_expands;
-	clock_t TimeStarted;
+  high_res_clock::time_point TimeStarted;
 	short unsigned int search_iteration;
 	short unsigned int replan_number;
   bool use_repair_time;
