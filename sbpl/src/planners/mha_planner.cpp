@@ -38,6 +38,7 @@ MHAPlanner::MHAPlanner(EnvironmentMHA *environment, int num_heurs,
   bforwardsearch = bSearchForward;
   env_ = environment;
   replan_number = 0;
+  batch = 0;
 
   num_heuristics = num_heurs;
   heaps.resize(num_heuristics);
@@ -645,6 +646,7 @@ int MHAPlanner::ImprovePath() {
 
       if ((goal_state->g > (long int)(inflation_eps * anchor_val) ||
            !goal_state->isTrueCost) && (goal_state->v > inflation_eps * anchor_val)) {
+        printf("EPSILON: %f\n", (double)(goal_state->g) / (double)(long int)(inflation_eps * anchor_val));
         terminate = false;
       }
 
@@ -884,6 +886,7 @@ int MHAPlanner::ImprovePath() {
 
     if (state->isTrueCost) {
       //mark the state as expanded
+      closed_states.push_back(state->id); 
       if (planner_type == mha_planner::PlannerType::IMHA) {
         state->v = state->g;
         state->expanded_best_parent = state->best_parent;
@@ -1241,6 +1244,61 @@ void MHAPlanner::initializeSearch() {
   env_->EnsureHeuristicsUpdated((bforwardsearch == true));
 }
 
+void MHAPlanner::GetNewStates() {
+  int q_id = 0;
+  for (size_t ii = 0; ii < closed_states.size(); ++ii) {
+    auto parent = GetState(q_id, closed_states[ii]);
+    if (parent->id != start_state_id) {
+      continue;
+    }
+    bool print = false; //parent->id == 12352;
+
+    if (print) {
+      printf("expand %d, q_id: %d\n", parent->id, q_id);
+    }
+
+    vector<int> children;
+    vector<int> costs;
+    vector<bool> isTrueCost;
+
+    if (params.use_lazy) {
+      if (bforwardsearch) {
+        env_->GetLazySuccs(q_id, parent->id, &children, &costs, &isTrueCost);
+      } else {
+        env_->GetLazyPreds(q_id, parent->id, &children, &costs, &isTrueCost);
+      }
+
+    } else {
+      if (bforwardsearch) {
+        env_->GetSuccs(q_id, parent->id, &children, &costs);
+      } else {
+        env_->GetPreds(q_id, parent->id, &children, &costs);
+      }
+      isTrueCost.resize(costs.size(), true);
+    }
+
+    if (planner_type == mha_planner::PlannerType::IMHA) {
+      //printf("expand %d\n",parent->id);
+      //iterate through children of the parent
+      for (int i = 0; i < (int)children.size(); i++) {
+        //printf("  succ %d\n",children[i]);
+        MHAState *child = GetState(q_id, children[i]);
+        insertLazyList(q_id, child, parent, costs[i], isTrueCost[i]);
+      }
+    } else {
+      for (int i = 0; i < (int)children.size(); i++) {
+        //printf("  succ %d\n",children[i]);
+        for (int j = 0; j < num_heuristics; ++j) {
+          // if (use_anchor && q_id == 0 && j != 0) continue;
+          MHAState *child = GetState(j, children[i]);
+          insertLazyList(j, child, parent, costs[i], isTrueCost[i]);
+
+        }
+      }
+    }
+  }
+}
+
 bool MHAPlanner::Search(vector<int> &pathIds, int &PathCost) {
   CKey key;
   TimeStarted = clock();
@@ -1279,6 +1337,17 @@ bool MHAPlanner::Search(vector<int> &pathIds, int &PathCost) {
     tempStat.time = delta_time;
     tempStat.cost = goal_state->g;
     stats.push_back(tempStat);
+
+    // if (batch < 3) {
+    if (false) {
+      printf("Planner done with batch %d!!\n", batch);
+      printf("Num states reopened: %zu\n", closed_states.size());
+      env_->UpdateBatch();
+      GetNewStates();
+      eps_satisfied = INFINITECOST;
+      ++batch;
+      continue;
+    }
 
     //no solution exists
     if (ret == 0) {

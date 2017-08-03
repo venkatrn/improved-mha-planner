@@ -57,6 +57,11 @@ class EnvironmentMHA : public virtual DiscreteSpaceInformation
       return 0;
     }
 
+    virtual void UpdateBatch() {
+      return;
+    }
+
+
     /**
      * \brief GetSuccs methods that inform the environment which queue the states are being expanded from
      */

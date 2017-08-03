@@ -153,6 +153,9 @@ class MHAPlanner : public SBPLPlanner{
     virtual int replan(std::vector<int>* solution_stateIDs_V, MHAReplanParams params);
     virtual int replan(std::vector<int>* solution_stateIDs_V, MHAReplanParams params, int* solcost);
 
+    // Incremental search
+    void GetNewStates();
+
     void interrupt();
 
     virtual int set_goal(int goal_stateID);
@@ -225,6 +228,12 @@ class MHAPlanner : public SBPLPlanner{
     short unsigned int search_iteration;
     short unsigned int replan_number;
     bool use_repair_time;
+
+    // Incremental search variables
+    int batch;
+    int num_updated_states;
+    // Mapping from batch number to closed list states
+    std::vector<int> closed_states;
 
     //stats
     std::vector<PlannerStats> stats;
