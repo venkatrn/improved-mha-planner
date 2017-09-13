@@ -646,7 +646,7 @@ int MHAPlanner::ImprovePath() {
 
       if ((goal_state->g > (long int)(inflation_eps * anchor_val) ||
            !goal_state->isTrueCost) && (goal_state->v > inflation_eps * anchor_val)) {
-        printf("EPSILON: %f\n", (double)(goal_state->g) / (double)(long int)(inflation_eps * anchor_val));
+        // printf("EPSILON: %f\n", (double)(goal_state->g) / (double)(long int)(inflation_eps * anchor_val));
         terminate = false;
       }
 
@@ -1248,9 +1248,9 @@ void MHAPlanner::GetNewStates() {
   int q_id = 0;
   for (size_t ii = 0; ii < closed_states.size(); ++ii) {
     auto parent = GetState(q_id, closed_states[ii]);
-    if (parent->id != start_state_id) {
-      continue;
-    }
+    // if (parent->id != start_state_id) {
+    //   continue;
+    // }
     bool print = false; //parent->id == 12352;
 
     if (print) {
@@ -1306,11 +1306,14 @@ bool MHAPlanner::Search(vector<int> &pathIds, int &PathCost) {
   initializeSearch();
 
   //the main loop of ARA*
+  int num_batches_with_no_solution_change = 0;
+  const int kMaxBatchesWithNoChange = 10;
+  clock_t before_time = clock();
+  int before_expands = search_expands;
+  int before_cost = goal_state->g;
   while (eps_satisfied > params.final_eps && !outOfTime()) {
 
     //run weighted A*
-    clock_t before_time = clock();
-    int before_expands = search_expands;
     //ImprovePath returns:
     //1 if the solution is found
     //0 if the solution does not exist
@@ -1338,15 +1341,38 @@ bool MHAPlanner::Search(vector<int> &pathIds, int &PathCost) {
     tempStat.cost = goal_state->g;
     stats.push_back(tempStat);
 
-    // if (batch < 3) {
+    int solution_cost_improvement = before_cost - goal_state->g;
+    if (solution_cost_improvement == 0) {
+      ++num_batches_with_no_solution_change;
+    } else {
+      num_batches_with_no_solution_change = 0;
+    }
+    // if (batch < 1000) {
     if (false) {
-      printf("Planner done with batch %d!!\n", batch);
-      printf("Num states reopened: %zu\n", closed_states.size());
-      env_->UpdateBatch();
+    // if (num_batches_with_no_solution_change == kMaxBatchesWithNoChange) {
+      // printf("Planner done with batch %d!!\n", batch);
+      // printf("Num states reopened: %zu\n", closed_states.size());
+      before_time = clock();
+      before_expands = search_expands;
+      before_cost = goal_state->g;
+      env_->UpdateBatch(goal_state->best_parent->id, solution_cost_improvement);
       GetNewStates();
       eps_satisfied = INFINITECOST;
+      // Note: works only for FOCAL-MHA*
+      CKey min_key = heaps[0].getminkeyheap();
+      long int anchor_val = min_key.key[0];
+      double current_subopt = double(goal_state->g) / double(anchor_val) - 0.1;
+      inflation_eps = std::min(inflation_eps - params.dec_eps, current_subopt);
+      // while(inflation_eps > 1.0 && goal_state->g < (long int)(inflation_eps * anchor_val)) {
+      //   inflation_eps -= params.dec_eps;
+      // }
+      inflation_eps = std::max(1.0, inflation_eps);
       ++batch;
       continue;
+      // if (inflation_eps > 1.0) {
+      //   ++batch;
+      //   continue;
+      // }
     }
 
     //no solution exists
@@ -1362,6 +1388,9 @@ bool MHAPlanner::Search(vector<int> &pathIds, int &PathCost) {
     }
 
     prepareNextSearchIteration();
+    before_time = clock();
+    before_expands = search_expands;
+    before_cost = goal_state->g;
   }
 
   if (goal_state->g == INFINITECOST) {

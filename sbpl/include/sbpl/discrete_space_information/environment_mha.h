@@ -57,7 +57,7 @@ class EnvironmentMHA : public virtual DiscreteSpaceInformation
       return 0;
     }
 
-    virtual void UpdateBatch() {
+    virtual void UpdateBatch(int incumbent_goal_parent_id, int sol_cost_change) {
       return;
     }
 
